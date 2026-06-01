@@ -1,5 +1,6 @@
 using UnityEngine;
 using Unity.Mathematics;
+using System.Collections.Generic;
 
 
 [System.Serializable]
@@ -52,6 +53,9 @@ public class TileGeneration : MonoBehaviour
 
     public Vector3[] vertices;
 
+    private Color[] colorMap;
+    private Texture2D tileTexture;
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -85,10 +89,6 @@ public class TileGeneration : MonoBehaviour
         float offsetX = this.gameObject.transform.position.x / tileSize;
         float offsetY = this.gameObject.transform.position.z / tileSize;
 
-        Debug.Log("TileSize: " +tileSize);
-        Debug.Log("offsetX: " + offsetX);
-        Debug.Log("offsetY: " + offsetY);
-
         offset = new Vector2(offsetX, offsetY);
 
         MapUVs();
@@ -99,7 +99,7 @@ public class TileGeneration : MonoBehaviour
        // pathFinder.BuildNodeNetwork(vertices);
         //pathFinder.AStar();
 
-        return vertices;
+        return GetWorldVertices();
     }
 
     void MapUVs()
@@ -116,7 +116,7 @@ public class TileGeneration : MonoBehaviour
     { 
         float[] heightMap = noiseMapGenerator.GenerateNoiseMap(this.mapScaleLarge, this.mapScaleSmall, offset, uvs, heightCurve);
 
-        Texture2D tileTexture = BuildTexture(heightMap);
+        tileTexture = BuildTexture(heightMap);
         this.meshRenderer.material.mainTexture = tileTexture;
 
         UpdateMeshVertices(heightMap);
@@ -136,8 +136,7 @@ public class TileGeneration : MonoBehaviour
 
     private Texture2D BuildTexture(float[] heightMap)
     {
-        Color[] colorMap = new Color[uvs.Length];
-        float[] remappedHeightMap = RemapHeightsLocally(heightMap);
+        colorMap = new Color[uvs.Length];
         for(int i = 0; i < uvs.Length; i++)
         {
             float height = heightMap[i];
@@ -147,12 +146,12 @@ public class TileGeneration : MonoBehaviour
         }
 
         int tileDepth = (int)Mathf.Sqrt(vertices.Length);
-        Texture2D tileTexture = new Texture2D(tileDepth, tileDepth);
-        tileTexture.wrapMode = TextureWrapMode.Clamp;
-        tileTexture.SetPixels(colorMap);
-        tileTexture.Apply();
+        Texture2D tex = new Texture2D(tileDepth, tileDepth);
+        tex.wrapMode = TextureWrapMode.Clamp;
+        tex.SetPixels(colorMap);
+        tex.Apply();
 
-        return tileTexture;
+        return tex;
     }
 
     private float[] RemapHeightsLocally(float[] heightMap)
@@ -193,9 +192,62 @@ public class TileGeneration : MonoBehaviour
         this.meshFilter.mesh.RecalculateNormals();
         this.meshCollider.sharedMesh = this.meshFilter.mesh;
 
-        for(int i =0; i<uvs.Length; i++)
+        
+
+
+    }
+
+    private Vector3[] GetWorldVertices()
+    {
+        Vector3[] worldVertices = new Vector3[vertices.Length];
+        for (int i = 0; i < uvs.Length; i++)
         {
-            vertices[i] = transform.TransformPoint(vertices[i]);
+            worldVertices[i] = transform.TransformPoint(vertices[i]);
+        }
+
+        return worldVertices;
+    }
+
+    public void ApplyVertexHeight(Dictionary<Vector2Int, TerrainNode> nodeDict)
+    {
+        bool textureChanged = false;
+
+        for (int i = 0; i < vertices.Length; i++)
+        {
+            Vector3 worldVertex = transform.TransformPoint(vertices[i]);
+
+            Vector2Int key = new Vector2Int(Mathf.FloorToInt(Mathf.Round(worldVertex.x)), Mathf.FloorToInt(Mathf.Round(worldVertex.z)));
+
+            if(nodeDict.TryGetValue(key, out TerrainNode node))
+            {
+                Vector3 changedWorldVertex = new Vector3(worldVertex.x, node.position.y, worldVertex.z);
+
+                if ((colorMap != null && i < colorMap.Length) && changedWorldVertex.y != vertices[i].y)
+                {
+                    colorMap[i] = Color.black;
+                    textureChanged = true;
+                }
+
+
+                vertices[i] = transform.InverseTransformPoint(changedWorldVertex);
+
+                
+            }
+        }
+
+        meshFilter.mesh.vertices = vertices;
+        meshFilter.mesh.RecalculateBounds();
+        meshFilter.mesh.RecalculateNormals();
+
+        meshCollider.sharedMesh = null;
+        meshCollider.sharedMesh = meshFilter.mesh;
+
+        if (textureChanged && tileTexture != null)
+        {
+            tileTexture.SetPixels(colorMap);
+            tileTexture.Apply();
+
+            meshRenderer.material.mainTexture = tileTexture;
         }
     }
 }

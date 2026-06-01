@@ -20,7 +20,7 @@ public class NoiseMapGenerator : MonoBehaviour
             float detail = Mathf.PerlinNoise((uvs[i].x + offset.x) / scaleSmall, (uvs[i].y + offset.y) / scaleSmall);
             detail -= 0.5f;
 
-            float height = primary;// + detail * 0.05f;
+            float height = primary + detail * 0.04f;
 
             //height /= 3f + 0.2f;
 

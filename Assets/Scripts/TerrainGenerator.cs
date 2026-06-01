@@ -11,6 +11,8 @@ public class TerrainGenerator : MonoBehaviour
 
     private List<Vector3> totalVertices = new List<Vector3>();
 
+    private List<TileGeneration> tiles = new List<TileGeneration>();
+
     private PathFinder pathFinder;
 
 
@@ -35,6 +37,7 @@ public class TerrainGenerator : MonoBehaviour
                 Vector3 tilePosition = new Vector3(this.gameObject.transform.position.x + x * tileWidth, this.gameObject.transform.position.y, this.gameObject.transform.position.z + z * tileDepth);
                 GameObject tile = Instantiate(tilePrefab, tilePosition, Quaternion.identity) as GameObject;
                 TileGeneration tileGen = tile.GetComponent<TileGeneration>();
+                tiles.Add(tileGen);
                 totalVertices.AddRange(tileGen.Regenerate());
             }
         }
@@ -47,7 +50,12 @@ public class TerrainGenerator : MonoBehaviour
         float dist = Vector2.Distance(new Vector2(totalVertices[0].x, totalVertices[0].z), new Vector2(totalVertices[1].x, totalVertices[1].z));
 
          pathFinder.BuildNodeNetwork(totalVertices.ToArray(), dist);
-         pathFinder.AStar();
+         Dictionary<Vector2Int, TerrainNode> nodeDict = pathFinder.AStar();
+
+        foreach(TileGeneration tile in tiles)
+        {
+            tile.ApplyVertexHeight(nodeDict);
+        }
     }
 
     // Update is called once per frame

@@ -15,7 +15,7 @@ GameObject:
   - component: {fileID: 1754798988313110417}
   - component: {fileID: 3193026877026162263}
   - component: {fileID: -2142348650081425030}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: Tile
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -141,22 +141,25 @@ MonoBehaviour:
   meshRenderer: {fileID: 617877583322890801}
   meshFilter: {fileID: 1879674549594602149}
   meshCollider: {fileID: 6454608263563170049}
-  mapScaleLarge: 0.4
+  mapScaleLarge: 6
   mapScaleSmall: 0.3
   terrainTypes:
   - name: Water
     height: 0.3
     color: {r: 0, g: 0.64864254, b: 1, a: 0}
   - name: Grass
-    height: 0.6
+    height: 0.4
     color: {r: 0, g: 0.48427665, b: 0.07720489, a: 0}
   - name: Rock
-    height: 0.8
+    height: 0.7
     color: {r: 0.32704395, g: 0.32704395, b: 0.32704395, a: 0}
   - name: Snow
-    height: 1
+    height: 0.85
     color: {r: 0.7058824, g: 0.8238993, b: 0.8238993, a: 0}
-  heightMultiplier: 10
+  - name: Lava
+    height: 1
+    color: {r: 1, g: 0, b: 0, a: 0}
+  heightMultiplier: 80
   heightCurve:
     serializedVersion: 2
     m_Curve:
@@ -205,7 +208,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 934f20b9ec6d1b248877a7bda616179f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  difficultyChangeStepsStart: 30
-  difficultyChangeStepsEnd: 45
+  roadRadiusInNodes: 1
+  slopeDifficultyPhases: 1
+  roadWidthDifficultyPhases: 1
+  difficultyPhasesSizeConstraints: {x: 5, y: 25}
+  difficultyPhasesGapConstraints: {x: 5, y: 25}
+  difficultyPhases: []
   startPosition: {x: 0, y: 0}
   targetPosition: {x: 0, y: 0}
