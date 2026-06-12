@@ -37,13 +37,10 @@ public class InputManager : MonoBehaviour
             float move = inputMaster.Vehicle.Move.ReadValue<float>();
             float turn = inputMaster.Vehicle.Turn.ReadValue<float>();
 
-            vehicleInput.x = Mathf.Clamp(move + turn, -1f, 1f);
-            vehicleInput.y = Mathf.Clamp(move - turn, -1f, 1f);
-
+            vehicleInput.x = move;
+            vehicleInput.y = turn;
 
             return vehicleInput;
-
-
         }
         else
         {
@@ -81,6 +78,10 @@ public class InputManager : MonoBehaviour
         {
             playerController.movement.Jump();
         } 
+        else
+        {
+            vehicleController.movement.SwitchHandbrake();
+        }
     }
 
     void OnEnable()

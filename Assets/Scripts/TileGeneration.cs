@@ -51,6 +51,7 @@ public class TileGeneration : MonoBehaviour
 
     private Vector2[] uvs;
 
+    [HideInInspector]
     public Vector3[] vertices;
 
     private Color[] colorMap;
@@ -224,7 +225,18 @@ public class TileGeneration : MonoBehaviour
 
                 if ((colorMap != null && i < colorMap.Length) && changedWorldVertex.y != vertices[i].y)
                 {
-                    colorMap[i] = Color.black;
+                    if(node.type == TerrainNode.TerrainType.ROAD)
+                    {
+                        colorMap[i] = Color.black;
+                    }
+                    else if(node.type == TerrainNode.TerrainType.HOLE)
+                    {
+                        colorMap[i] = Color.red;
+                    }
+                    else if(node.type == TerrainNode.TerrainType.BIGHOLE)
+                    {
+                        colorMap[i] = Color.magenta;
+                    }
                     textureChanged = true;
                 }
 

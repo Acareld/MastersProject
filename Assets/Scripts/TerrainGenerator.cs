@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class TerrainGenerator : MonoBehaviour
@@ -15,13 +16,36 @@ public class TerrainGenerator : MonoBehaviour
 
     private PathFinder pathFinder;
 
+    [SerializeField]
+    private bool shouldRegenerate = true;
+
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
         pathFinder = GetComponent<PathFinder>();
 
-        GenerateMap();
+        
+    }
+
+    void Update()
+    {
+        if(shouldRegenerate)
+        {
+            Cleanup();
+            GenerateMap();
+            shouldRegenerate = false;
+        }
+    }
+
+    private void Cleanup()
+    {
+        foreach (TileGeneration tilegen in tiles)
+        {
+            Destroy(tilegen.gameObject);
+        }
+        tiles.Clear();
+        totalVertices.Clear();
     }
 
     private void GenerateMap()
@@ -58,9 +82,5 @@ public class TerrainGenerator : MonoBehaviour
         }
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
+
 }

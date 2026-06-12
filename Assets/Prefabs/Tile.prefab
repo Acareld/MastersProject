@@ -124,6 +124,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4d3aac94aeafeb14885d14b7de80893e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  octaves: 5
+  persistence: 0.5
+  lacunarity: 2
+  seed: 10
 --- !u!114 &3193026877026162263
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -141,7 +145,7 @@ MonoBehaviour:
   meshRenderer: {fileID: 617877583322890801}
   meshFilter: {fileID: 1879674549594602149}
   meshCollider: {fileID: 6454608263563170049}
-  mapScaleLarge: 6
+  mapScaleLarge: 20
   mapScaleSmall: 0.3
   terrainTypes:
   - name: Water
@@ -152,19 +156,19 @@ MonoBehaviour:
     color: {r: 0, g: 0.48427665, b: 0.07720489, a: 0}
   - name: Rock
     height: 0.7
-    color: {r: 0.32704395, g: 0.32704395, b: 0.32704395, a: 0}
+    color: {r: 0.46540874, g: 0.46540874, b: 0.46540874, a: 0}
   - name: Snow
     height: 0.85
     color: {r: 0.7058824, g: 0.8238993, b: 0.8238993, a: 0}
   - name: Lava
     height: 1
     color: {r: 1, g: 0, b: 0, a: 0}
-  heightMultiplier: 80
+  heightMultiplier: 90
   heightCurve:
     serializedVersion: 2
     m_Curve:
     - serializedVersion: 3
-      time: 0
+      time: -1
       value: 0
       inSlope: 0
       outSlope: 0
@@ -173,8 +177,8 @@ MonoBehaviour:
       inWeight: 0
       outWeight: 0
     - serializedVersion: 3
-      time: 0.30346763
-      value: -0.0038034618
+      time: -0.7
+      value: 0
       inSlope: 0.073637165
       outSlope: 0.073637165
       tangentMode: 0
@@ -182,13 +186,22 @@ MonoBehaviour:
       inWeight: 0.23257895
       outWeight: 0.33333334
     - serializedVersion: 3
-      time: 3.4974859
-      value: 14.785022
-      inSlope: 7.91628
-      outSlope: 7.91628
+      time: 0.49918953
+      value: 0.68815684
+      inSlope: 1.3150753
+      outSlope: 1.3150753
       tangentMode: 0
       weightedMode: 0
-      inWeight: 0.05652421
+      inWeight: 0.07883904
+      outWeight: 0.114928134
+    - serializedVersion: 3
+      time: 0.99311566
+      value: 2.0134325
+      inSlope: 4.2566066
+      outSlope: 4.2566066
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.15184693
       outWeight: 0
     m_PreInfinity: 2
     m_PostInfinity: 2

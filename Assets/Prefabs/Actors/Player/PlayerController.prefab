@@ -401,7 +401,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   isActive: 1
   moveInput: {x: 0, y: 0}
-  gravityForce: 5
+  gravityForce: -5
   moveSpeed: 3
   moveAcceleration: 6
   jumpHeight: 2
