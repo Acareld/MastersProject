@@ -1,5 +1,5 @@
+
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 using UnityEngine;
 
 
@@ -10,7 +10,7 @@ public class RampGenerator : MonoBehaviour
     [Header("Hole with Ramp")]
     [SerializeField] private int holeCount = 10;
     [SerializeField] private float minHoleSpacing = 20f;
-    [SerializeField] private Vector2 holeRadiusRange = new Vector2(1.5f, 3.5f);
+    [SerializeField] private int trenchRadius;
     [SerializeField] private Vector2 holeDepthRange = new Vector2(1f, 3f);
     [SerializeField] private GameObject rampPrefab;
 
@@ -19,6 +19,15 @@ public class RampGenerator : MonoBehaviour
         public Vector2Int key;
         public Vector2 roadForward;
         public float slope;
+        public int pathIndex;
+    }
+
+    public void SetDifficultySettings(DifficultyState state)
+    {
+        holeCount = state.trenchSettings.trenchCount;
+        minHoleSpacing = state.trenchSettings.minTrenchSpacing;
+        trenchRadius = state.trenchSettings.trenchRadius;
+        holeDepthRange = state.trenchSettings.trenchDepthRange;
     }
 
     public void PlaceRampHoles(Dictionary<Vector2Int, TerrainNode> nodeDict, List<TerrainNode> path, HashSet<Vector2Int> roadMask, int vertexDist)
@@ -30,12 +39,31 @@ public class RampGenerator : MonoBehaviour
 
         int placed = 0;
 
-        for (int i = 2; i < path.Count - 2; i++)
+        for (int i = 6; i < path.Count - 6; i++)
         {
             Vector2Int key = TerrainNode.NodeKey(path[i]);
 
             if (!roadMask.Contains(key))
                 continue;
+
+            int rampIndex = i - 3;
+
+            if (IsAngleTooSharpInWindow(path, i, 3 + 2, 2, 3, 20f))
+            {
+                Vector3 pos = path[i].position + Vector3.up * 5f;
+                Debug.DrawRay(pos, Vector3.up * 5f, Color.blue, 100f);
+                continue;
+            }
+
+            if (!IsPathFlatEnough(path, rampIndex, 2, 2, 0.08f))
+            {
+                continue;
+            }
+
+            if (!IsPathFlatEnough(path, i, 3 + 2, 1, 0.08f))
+            {
+                continue;
+            }
 
             Vector3 prev = path[i - 1].position;
             Vector3 current = path[i].position;
@@ -48,8 +76,8 @@ public class RampGenerator : MonoBehaviour
 
             Vector2 roadForward = new Vector2(roadDir3D.x, roadDir3D.z).normalized;
 
-            float distance = Vector3.Distance(prev, next);
-            float heightDiff = Mathf.Abs(next.y - prev.y);
+            float distance = Vector3.Distance(path[i - 4].position, path[i + 4].position);
+            float heightDiff = Mathf.Abs(path[i + 4].position.y - path[i - 4].position.y);
 
             float slope = heightDiff / Mathf.Max(distance, 0.001f);
 
@@ -57,7 +85,8 @@ public class RampGenerator : MonoBehaviour
             {
                 key = key,
                 roadForward = roadForward,
-                slope = slope
+                slope = slope,
+                pathIndex = i
             });
         }
         PathFinder.Shuffle(candidates);
@@ -69,6 +98,10 @@ public class RampGenerator : MonoBehaviour
 
             bool tooClose = false;
 
+            // debug show valid candidates apart from minholespacing
+            Vector3 worldPos = new Vector3(candidate.key.x, nodeDict[candidate.key].position.y, candidate.key.y);
+            Debug.DrawRay(worldPos, Vector3.up * 10f, Color.yellow, 100f);
+
             foreach (Vector2Int pothole in placedPotholes)
             {
                 if (Vector2Int.Distance(pothole, candidate.key) < minHoleSpacing)
@@ -79,13 +112,11 @@ public class RampGenerator : MonoBehaviour
             }
 
             if (tooClose) continue;
-
-            float radius = Random.Range(holeRadiusRange.x, holeRadiusRange.y);
+          
             float depth = Random.Range(holeDepthRange.x, holeDepthRange.y);
 
-
-
-            CreateRampHoles(nodeDict, candidate.key, radius, depth, vertexDist, roadMask, candidate.roadForward);
+            CreateRampHoles(nodeDict, candidate.key, trenchRadius, depth, vertexDist, roadMask, candidate.roadForward);
+            SpawnRamp(nodeDict, path, candidate, trenchRadius, depth, vertexDist);
 
             placedPotholes.Add(candidate.key);
             placed++;
@@ -94,21 +125,23 @@ public class RampGenerator : MonoBehaviour
         if (placed < holeCount)
         {
             Debug.LogWarning(
-                $"Only placed {placed}/{holeCount} potholes. Not enough valid road space."
+                $"Only placed {placed}/{holeCount} Ramps and holes. Not enough valid road space."
             );
         }
 
     }
 
-    private void CreateRampHoles(Dictionary<Vector2Int, TerrainNode> nodeDict, Vector2Int center, float radius, float depth, int dist, HashSet<Vector2Int> roadMask, Vector2 roadForward)
+    private void CreateRampHoles(Dictionary<Vector2Int, TerrainNode> nodeDict, Vector2Int center, int radius, float depth, int dist, HashSet<Vector2Int> roadMask, Vector2 roadForward)
     {
 
         roadForward.Normalize();
 
         Vector2 roadRight = new Vector2(-roadForward.y, roadForward.x);
 
+        float alongRadius = Mathf.Max(radius, dist);
+        float acrossRadius = 5f;
 
-        int nodeRadius = Mathf.CeilToInt(radius / Mathf.Max(dist, 1f));
+        int nodeRadius = Mathf.CeilToInt(Mathf.Max(alongRadius, acrossRadius) / Mathf.Max(dist, 1f));
 
         for (int x = -nodeRadius; x <= nodeRadius; x++)
         {
@@ -120,11 +153,11 @@ public class RampGenerator : MonoBehaviour
 
                 if (!roadMask.Contains(key)) continue;
 
-                Vector2 offset = new Vector2( key.x - center.x, key.y - center.y);
+                Vector2 offset = new Vector2(key.x - center.x, key.y - center.y);
 
                 float distance = offset.magnitude;
 
-                if (distance > 0.001f)
+                /*if (distance > 0.001f)
                 {
                     Vector2 dirFromCenter = offset / distance;
 
@@ -134,14 +167,25 @@ public class RampGenerator : MonoBehaviour
 
                     if (isInRoadDirection && isFarEnough)
                         continue;
-                }
+                }*/
 
 
-                if (distance > radius) continue;
+                float alongRoad = Vector2.Dot(offset, roadForward);
+                float acrossRoad = Vector2.Dot(offset, roadRight);
 
-                float t = distance / radius;
+                float along01 = Mathf.Abs(alongRoad) / alongRadius;
+                float across01 = Mathf.Abs(acrossRoad) / acrossRadius;
 
-                float falloff = 1f - Mathf.SmoothStep(0f, 1f, t);
+                if (along01 > 1f)
+                    continue;
+
+                if (across01 > 1f)
+                    continue;
+
+                float alongFalloff = 1f - Mathf.SmoothStep(0f, 1f, along01);
+                //float acrossFalloff = 1f - Mathf.SmoothStep(0.85f, 1f, across01);
+
+                float falloff = alongFalloff;
 
                 TerrainNode node = nodeDict[key];
 
@@ -153,6 +197,105 @@ public class RampGenerator : MonoBehaviour
             }
         }
 
+    }
+
+    private void SpawnRamp(Dictionary<Vector2Int, TerrainNode> nodeDict, List<TerrainNode> path, HoleCandidate candidate, int radius, float depth, int dist)
+    {
+        Vector2 roadForward = candidate.roadForward.normalized;
+
+        Vector2 rampOffset = roadForward * (-radius + dist);
+
+        Vector2 rampXZ = new Vector2(candidate.key.x, candidate.key.y) + rampOffset;
+
+        Vector2Int rampKey = new Vector2Int(Mathf.RoundToInt(rampXZ.x), Mathf.RoundToInt(rampXZ.y));
+
+        Vector3 rampWorldPosition = path[candidate.pathIndex - 1].position;
+
+        /*if (nodeDict.TryGetValue(rampKey, out TerrainNode rampNode))
+        {
+            //rampWorldPosition = rampNode.position;
+            TerrainNode holeNode = path[candidate.pathIndex - 2];
+
+            rampWorldPosition = new Vector3(rampXZ.x, holeNode.position.y, rampXZ.y);
+        }
+        else
+        {
+            TerrainNode holeNode = path[candidate.pathIndex - 2];
+
+            rampWorldPosition = new Vector3(rampXZ.x, holeNode.position.y, rampXZ.y);
+        }*/
+
+        // rampWorldPosition.y += depth;
+
+        Vector3 roadForward3D = new Vector3(roadForward.x, 0f, roadForward.y);
+
+        Quaternion rampRotation = Quaternion.LookRotation(roadForward3D, Vector3.up);
+
+        Instantiate(rampPrefab, rampWorldPosition, rampRotation);
+
+    }
+
+    private bool IsPathFlatEnough(List<TerrainNode> path, int centerIndex, int nodesBefore, int nodesAfter, float maxSlope)
+    {
+        int start = Mathf.Max(0, centerIndex - nodesBefore);
+        int end = Mathf.Min(path.Count - 1, centerIndex + nodesAfter);
+
+        float minHeight = float.MaxValue;
+        float maxHeight = float.MinValue;
+
+        for (int i = start; i < end; i++)
+        {
+            Vector3 current = path[i].position;
+            Vector3 next = path[i + 1].position;
+
+            float distance = Vector3.Distance(current, next);
+            float heightDiff = Mathf.Abs(next.y - current.y);
+
+            float segmentSlope = heightDiff / Mathf.Max(distance, 0.001f);
+
+            if (segmentSlope > maxSlope) return false;
+
+            minHeight = Mathf.Min(minHeight, current.y, next.y);
+            maxHeight = Mathf.Max(maxHeight, current.y, next.y);
+        }
+
+        return maxHeight - minHeight <= 0.6f;
+    }
+
+    private bool IsAngleTooSharpInWindow(List<TerrainNode> path, int centerIndex, int nodesBefore, int nodesAfter, int offset, float maxAngle)
+    {
+        int start = Mathf.Max(offset, centerIndex - nodesBefore);
+        int end = Mathf.Min(path.Count - 1 - offset, centerIndex + nodesAfter);
+
+        for (int i = start; i <= end; i++)
+        {
+            if (IsAngleTooSharp(path, i, offset, maxAngle))
+                return true;
+        }
+
+        return false;
+    }
+
+    private bool IsAngleTooSharp(List<TerrainNode> path, int index, int offset, float maxAngle)
+    {
+        int beforeIndex = index - offset;
+        int afterIndex = index + offset;
+
+        if (beforeIndex < 0 || afterIndex >= path.Count)
+            return true;
+
+        Vector3 beforeDir = path[index].position - path[beforeIndex].position;
+        Vector3 afterDir = path[afterIndex].position - path[index].position;
+
+        beforeDir.y = 0f;
+        afterDir.y = 0f;
+
+        if (beforeDir.sqrMagnitude < 0.001f || afterDir.sqrMagnitude < 0.001f)
+            return true;
+
+        float angle = Vector3.Angle(beforeDir.normalized, afterDir.normalized);
+
+        return angle > maxAngle;
     }
 
 

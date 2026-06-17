@@ -63,12 +63,6 @@ public class DifficultyPhase
     public float targetSlope;
     public float slopeMatchWeight;
 
-    public enum DifficultyType
-    {
-        EASY,
-        MEDIUM,
-        HARD
-    }
 
     public DifficultyPhase(float startProgress, float endProgress, float uphillModifier, float targetSlope, float slopeMatchWeight)
     {
@@ -106,7 +100,7 @@ public class PathFinder : MonoBehaviour
     private Vector2Int difficultyPhasesGapConstraints = new Vector2Int(5, 25);
 
     [SerializeField]
-    private DifficultyPhase[] difficultyPhases;
+    private List<DifficultyPhase> difficultyPhases;
 
 
     
@@ -132,6 +126,8 @@ public class PathFinder : MonoBehaviour
     private int dist;
 
     private ObstacleGenerator obstacleGenerator;
+
+    private DifficultyState difficultyState;
 
 
     void Awake()
@@ -223,8 +219,9 @@ public class PathFinder : MonoBehaviour
             }
         }
 
-        startNode = nodeDict[new Vector2Int(minX, minZ)];
-        targetNode = nodeDict[new Vector2Int(maxX, maxZ)];
+        int centerZ = Mathf.FloorToInt(((maxZ - minZ) / 2) + minZ);
+        startNode = nodeDict[new Vector2Int(minX, centerZ)];
+        targetNode = nodeDict[new Vector2Int(maxX, centerZ)];
 
         estimatedSteps = Mathf.Max(Mathf.Abs(targetNode.position.x - startNode.position.x), Mathf.Abs(targetNode.position.z - startNode.position.z));
 
@@ -251,6 +248,12 @@ public class PathFinder : MonoBehaviour
 
              }
          }*/
+    }
+
+    public void SetDifficultySettings(DifficultyState state)
+    {
+        difficultyPhases = state.slopePhases;
+        difficultyState = state;
     }
 
     public Dictionary<Vector2Int, TerrainNode> AStar()
@@ -348,7 +351,7 @@ public class PathFinder : MonoBehaviour
     {
         float progress = ProgressAlongPath(position, startNode.position, targetNode.position);
 
-        for (int i = 0; i < difficultyPhases.Length; i++)
+        for (int i = 0; i < difficultyPhases.Count; i++)
         {
             if (progress >= difficultyPhases[i].startProgress &&
                 progress < difficultyPhases[i].endProgress)
@@ -422,7 +425,7 @@ public class PathFinder : MonoBehaviour
         return smoothedHeights;
     }
 
-    private void GenerateSlopeDifficulties(int maxStepSize)
+    /*private void GenerateSlopeDifficulties(int maxStepSize)
     {
         difficultyPhases = new DifficultyPhase[difficultyPhasesSizeConstraints.y];
         int currentStep = 0;
@@ -438,7 +441,7 @@ public class PathFinder : MonoBehaviour
             }
             // difficultyPhases[i] = new DifficultyPhase(start, start + size, 0f);
         }
-    }
+    }*/
 
     private Dictionary<Vector2Int, TerrainNode> DrawPath()
     {
@@ -470,7 +473,7 @@ public class PathFinder : MonoBehaviour
             bool isDifficult = false;
             float progress = ProgressAlongPath(path[i].position, startNode.position, targetNode.position);
 
-            for (int j = 0; j < difficultyPhases.Length; j++)
+            for (int j = 0; j < difficultyPhases.Count; j++)
             {
                 if (progress >= difficultyPhases[j].startProgress &&
                     progress < difficultyPhases[j].endProgress)
@@ -528,7 +531,7 @@ public class PathFinder : MonoBehaviour
             roadMask.Add(entry.Key);
         }
 
-        obstacleGenerator.GenerateObstacles(nodeDict, path, roadMask, dist);
+        obstacleGenerator.GenerateObstacles(difficultyState, nodeDict, path, roadMask, dist);
 
         return nodeDict;
     }

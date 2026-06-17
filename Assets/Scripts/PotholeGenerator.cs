@@ -11,6 +11,14 @@ public class PotholeGenerator : MonoBehaviour
     [SerializeField] private Vector2 potholeDepthRange = new Vector2(0.4f, 1.2f);
 
 
+    public void SetDifficultySettings(DifficultyState state)
+    {
+        potholeCount = state.potholeSettings.potholeCount;
+        minPotholeSpacing = state.potholeSettings.minPotholeSpacing;
+        potholeRadiusRange = state.potholeSettings.potholeRadiusRange;
+        potholeDepthRange = state.potholeSettings.potholeDepthRange;
+    }
+
     public void PlacePotholes(Dictionary<Vector2Int, TerrainNode> nodeDict, List<TerrainNode> path, HashSet<Vector2Int> roadMask, int vertexDist)
     {
         if (path == null || path.Count < 5) return;

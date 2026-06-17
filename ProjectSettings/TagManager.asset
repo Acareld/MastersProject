@@ -9,6 +9,8 @@ TagManager:
   - InputManager
   - Vehicle
   - VehicleCamerasHolder
+  - DifficultyManager
+  - TerrainGeneratorManager
   layers:
   - Default
   - TransparentFX

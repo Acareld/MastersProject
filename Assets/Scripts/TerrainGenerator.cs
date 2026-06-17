@@ -17,25 +17,37 @@ public class TerrainGenerator : MonoBehaviour
     private PathFinder pathFinder;
 
     [SerializeField]
-    private bool shouldRegenerate = true;
+    private bool shouldRegenerate = false;
+
+    // Difficulty Settings
+    private DifficultyState difficultyState;
 
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+
+    void Awake()
     {
         pathFinder = GetComponent<PathFinder>();
-
-        
     }
 
     void Update()
     {
-        if(shouldRegenerate)
+        /*if(shouldRegenerate)
         {
             Cleanup();
             GenerateMap();
             shouldRegenerate = false;
-        }
+        }*/
+    }
+
+    public void SetDifficultySettings(DifficultyState state)
+    {
+        difficultyState = state;
+    }
+
+    public void Generate()
+    {
+        Cleanup();
+        GenerateMap();
     }
 
     private void Cleanup()
@@ -74,6 +86,7 @@ public class TerrainGenerator : MonoBehaviour
         float dist = Vector2.Distance(new Vector2(totalVertices[0].x, totalVertices[0].z), new Vector2(totalVertices[1].x, totalVertices[1].z));
 
          pathFinder.BuildNodeNetwork(totalVertices.ToArray(), dist);
+         pathFinder.SetDifficultySettings(difficultyState);
          Dictionary<Vector2Int, TerrainNode> nodeDict = pathFinder.AStar();
 
         foreach(TileGeneration tile in tiles)
