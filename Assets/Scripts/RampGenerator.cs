@@ -12,7 +12,9 @@ public class RampGenerator : MonoBehaviour
     [SerializeField] private float minHoleSpacing = 20f;
     [SerializeField] private int trenchRadius;
     [SerializeField] private Vector2 holeDepthRange = new Vector2(1f, 3f);
+    [SerializeField] private float maxRampSpawnSlope = 0.08f;
     [SerializeField] private GameObject rampPrefab;
+    [SerializeField] private LayerMask groundLayer;
 
     private struct HoleCandidate
     {
@@ -28,6 +30,7 @@ public class RampGenerator : MonoBehaviour
         minHoleSpacing = state.trenchSettings.minTrenchSpacing;
         trenchRadius = state.trenchSettings.trenchRadius;
         holeDepthRange = state.trenchSettings.trenchDepthRange;
+        maxRampSpawnSlope = state.trenchSettings.maxRampSpawnSlope;
     }
 
     public void PlaceRampHoles(Dictionary<Vector2Int, TerrainNode> nodeDict, List<TerrainNode> path, HashSet<Vector2Int> roadMask, int vertexDist)
@@ -48,20 +51,25 @@ public class RampGenerator : MonoBehaviour
 
             int rampIndex = i - 3;
 
-            if (IsAngleTooSharpInWindow(path, i, 3 + 2, 2, 3, 20f))
+            if (IsAngleTooSharpInWindow(path, i, 2, 2, 3, 20f))
             {
                 Vector3 pos = path[i].position + Vector3.up * 5f;
-                Debug.DrawRay(pos, Vector3.up * 5f, Color.blue, 100f);
+                //Debug.DrawRay(pos, Vector3.up * 5f, Color.blue, 100f);
                 continue;
             }
 
-            if (!IsPathFlatEnough(path, rampIndex, 2, 2, 0.08f))
+            if (!IsPathFlatEnough(path, rampIndex, 2, 2, maxRampSpawnSlope))
+
             {
+                Vector3 pos = path[i].position + Vector3.up * 3f;
+                //Debug.DrawRay(pos, Vector3.up * 5f, Color.red, 100f);
                 continue;
             }
 
-            if (!IsPathFlatEnough(path, i, 3 + 2, 1, 0.08f))
+            if (!IsPathFlatEnough(path, i, 2, 3, maxRampSpawnSlope))
             {
+                Vector3 pos = path[i].position + Vector3.up * 3f;
+                //Debug.DrawRay(pos, Vector3.up * 5f, Color.green, 100f);
                 continue;
             }
 
@@ -94,13 +102,13 @@ public class RampGenerator : MonoBehaviour
         foreach (HoleCandidate candidate in candidates)
         {
             if (placed >= holeCount) break;
-            if (candidate.slope > 0.12f) continue;
+            //if (candidate.slope > 0.12f) continue;
 
             bool tooClose = false;
 
             // debug show valid candidates apart from minholespacing
             Vector3 worldPos = new Vector3(candidate.key.x, nodeDict[candidate.key].position.y, candidate.key.y);
-            Debug.DrawRay(worldPos, Vector3.up * 10f, Color.yellow, 100f);
+            //Debug.DrawRay(worldPos, Vector3.up * 10f, Color.yellow, 100f);
 
             foreach (Vector2Int pothole in placedPotholes)
             {
@@ -209,7 +217,7 @@ public class RampGenerator : MonoBehaviour
 
         Vector2Int rampKey = new Vector2Int(Mathf.RoundToInt(rampXZ.x), Mathf.RoundToInt(rampXZ.y));
 
-        Vector3 rampWorldPosition = path[candidate.pathIndex - 1].position;
+        Vector3 rampWorldPosition = path[candidate.pathIndex - 3].position;
 
         /*if (nodeDict.TryGetValue(rampKey, out TerrainNode rampNode))
         {
@@ -227,9 +235,18 @@ public class RampGenerator : MonoBehaviour
 
         // rampWorldPosition.y += depth;
 
-        Vector3 roadForward3D = new Vector3(roadForward.x, 0f, roadForward.y);
+        Debug.DrawRay(rampWorldPosition + Vector3.up * 5, -Vector3.up * 10f, Color.red, 100f);
 
-        Quaternion rampRotation = Quaternion.LookRotation(roadForward3D, Vector3.up);
+        RaycastHit groundHit;
+        if (!Physics.Raycast(rampWorldPosition + Vector3.up * 5, -Vector3.up, out groundHit, 10f, groundLayer))
+        {
+            return;
+        }
+
+        Vector3 roadForward3D = new Vector3(roadForward.x, 0f, roadForward.y);
+        Vector3 roadForwardOnroad = Vector3.ProjectOnPlane(roadForward3D, groundHit.normal).normalized;
+
+        Quaternion rampRotation = Quaternion.LookRotation(roadForwardOnroad, groundHit.normal);
 
         Instantiate(rampPrefab, rampWorldPosition, rampRotation);
 
@@ -239,6 +256,7 @@ public class RampGenerator : MonoBehaviour
     {
         int start = Mathf.Max(0, centerIndex - nodesBefore);
         int end = Mathf.Min(path.Count - 1, centerIndex + nodesAfter);
+        float baseHeight = path[start].position.y;
 
         float minHeight = float.MaxValue;
         float maxHeight = float.MinValue;
@@ -249,18 +267,29 @@ public class RampGenerator : MonoBehaviour
             Vector3 next = path[i + 1].position;
 
             float distance = Vector3.Distance(current, next);
-            float heightDiff = Mathf.Abs(next.y - current.y);
+            float heightDiff = next.y - current.y;
 
-            float segmentSlope = heightDiff / Mathf.Max(distance, 0.001f);
+            float uphill = Mathf.Max(0f, heightDiff);
 
-            if (segmentSlope > maxSlope) return false;
+            float slope = Mathf.Abs(heightDiff) / Mathf.Max(distance, 0.001f);
 
-            minHeight = Mathf.Min(minHeight, current.y, next.y);
-            maxHeight = Mathf.Max(maxHeight, current.y, next.y);
+            if (heightDiff > 0f && slope > 0.08f)
+            {
+                return false;
+            }
+
+            if (heightDiff < 0f && slope > 3f)
+            {
+                return false;
+            }
         }
 
-        return maxHeight - minHeight <= 0.6f;
+        return true;
+
+        //return maxHeight - minHeight <= 0.6f;
     }
+
+    
 
     private bool IsAngleTooSharpInWindow(List<TerrainNode> path, int centerIndex, int nodesBefore, int nodesAfter, int offset, float maxAngle)
     {

@@ -19,6 +19,7 @@ public struct TrenchDifficultySettings
     public float minTrenchSpacing;
     public int trenchRadius;
     public Vector2 trenchDepthRange;
+    public float maxRampSpawnSlope;
 }
 
 [System.Serializable]

@@ -26,6 +26,8 @@ public class TerrainNode
 
     public TerrainType type = TerrainType.TERRAIN;
 
+
+
     public enum TerrainType
     {
         TERRAIN,
@@ -103,7 +105,7 @@ public class PathFinder : MonoBehaviour
     private List<DifficultyPhase> difficultyPhases;
 
 
-    
+
 
     [SerializeField]
     Vector2Int startPosition;
@@ -129,6 +131,7 @@ public class PathFinder : MonoBehaviour
 
     private DifficultyState difficultyState;
 
+    private RoadConnector exitRoadConnector;
 
     void Awake()
     {
@@ -220,35 +223,54 @@ public class PathFinder : MonoBehaviour
         }
 
         int centerZ = Mathf.FloorToInt(((maxZ - minZ) / 2) + minZ);
-        startNode = nodeDict[new Vector2Int(minX, centerZ)];
+
+        if(gameObject.transform.position.x == 0) startNode = nodeDict[new Vector2Int(minX, centerZ)];
+
         targetNode = nodeDict[new Vector2Int(maxX, centerZ)];
 
-        estimatedSteps = Mathf.Max(Mathf.Abs(targetNode.position.x - startNode.position.x), Mathf.Abs(targetNode.position.z - startNode.position.z));
+        //estimatedSteps = Mathf.Max(Mathf.Abs(targetNode.position.x - startNode.position.x), Mathf.Abs(targetNode.position.z - startNode.position.z));
 
-
+        //DebugDrawTerrainSlopes();
         //BuildDifficultyPhases();
     }
 
-    private void BuildDifficultyPhases()
+
+
+
+    public void SetEntryConnector(RoadConnector entryConnector)
     {
-        /* difficultyPhases = new DifficultyPhase[difficultyTypes.Count];
-         for(int i = 0; i < difficultyTypes.Count; i++)
-         {
-             DifficultyType type = difficultyTypes[i];
-             if(type == DifficultyType.EASY)
-             {
+        TerrainNode closest = null;
+        float dist = float.MaxValue;
 
-             }
-             else if(type == DifficultyType.MEDIUM)
-             {
+        foreach (TerrainNode node in nodeDict.Values)
+        {
+            float distance = Vector2.Distance(new Vector2(node.position.x, node.position.z), new Vector2(entryConnector.worldPosition.x, entryConnector.worldPosition.z));
 
-             }
-             else
-             {
+            if (distance < dist)
+            {
+                dist = distance;
+                closest = node;
+            }
+        }
 
-             }
-         }*/
+        if (closest != null)
+        {
+            startNode = closest;
+        }
     }
+
+    public void ForceStartHeight(float height)
+    {
+        if (startNode == null)
+        {
+            return;
+        }
+
+        startNode.position.y = height;
+        startNode.height = height;
+    }
+
+
 
     public void SetDifficultySettings(DifficultyState state)
     {
@@ -363,7 +385,7 @@ public class PathFinder : MonoBehaviour
         return DifficultyPhase.GetDefault();
     }
 
-    
+
 
     private void AddRoadHeight(
     Dictionary<Vector2Int, List<float>> roadHeights,
@@ -458,6 +480,8 @@ public class PathFinder : MonoBehaviour
         path.Add(startNode);
         path.Reverse();
 
+
+
         Dictionary<Vector2Int, float> smoothedPathHeights = SmoothPathHeights(path);
 
         Dictionary<Vector2Int, List<float>> roadHeights = new Dictionary<Vector2Int, List<float>>();
@@ -533,11 +557,44 @@ public class PathFinder : MonoBehaviour
 
         obstacleGenerator.GenerateObstacles(difficultyState, nodeDict, path, roadMask, dist);
 
+        StoreExitConnector(path);
+
         return nodeDict;
     }
 
 
-    
+    private void StoreExitConnector(List<TerrainNode> path)
+    {
+        if (path == null || path.Count < 2)
+        {
+            exitRoadConnector = new RoadConnector
+            {
+                isValid = false
+            };
+
+            return;
+        }
+
+        TerrainNode last = path[path.Count - 1];
+        TerrainNode previous = path[path.Count - 2];
+
+        Vector3 direction = (last.position - previous.position).normalized;
+
+       
+        exitRoadConnector = new RoadConnector
+        {
+            worldPosition = last.position,
+            height = last.position.y,
+            direction = direction,
+            roadRadius = 4,
+            isValid = true
+        };
+    }
+
+    public RoadConnector GetExitRoadConnector()
+    {
+        return exitRoadConnector;
+    }
 
     public static void Shuffle<T>(List<T> list)
     {
@@ -549,6 +606,55 @@ public class PathFinder : MonoBehaviour
             list[i] = list[randomIndex];
             list[randomIndex] = temp;
         }
+    }
+
+    // DEBUG
+    private void DebugDrawTerrainSlopes(float duration = 100f)
+    {
+        foreach (TerrainNode node in nodeDict.Values)
+        {
+            foreach (TerrainNode neighbour in node.neighbours)
+            {
+                float distance = Vector3.Distance(node.position, neighbour.position);
+                float heightDifference = neighbour.height - node.height;
+
+                float slope = Mathf.Abs(heightDifference) / Mathf.Max(distance, 0.001f);
+
+                Color color = GetSlopeColor(slope);
+
+                Debug.DrawLine(
+                    node.position + Vector3.up * 0.2f,
+                    neighbour.position + Vector3.up * 0.2f,
+                    color,
+                    duration
+                );
+            }
+        }
+    }
+
+    private Color GetSlopeColor(float slope)
+    {
+        if (slope < 0.05f)
+        {
+            return Color.blue;      // very flat
+        }
+
+        if (slope < 0.15f)
+        {
+            return Color.green;     // gentle
+        }
+
+        if (slope < 0.30f)
+        {
+            return Color.yellow;    // noticeable slope
+        }
+
+        if (slope < 0.60f)
+        {
+            return new Color(1f, 0.5f, 0f); // orange
+        }
+
+        return Color.red;           // very steep
     }
 
 }

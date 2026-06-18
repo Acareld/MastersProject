@@ -180,7 +180,7 @@ Camera:
     height: 1
   near clip plane: 0.1
   far clip plane: 1000
-  field of view: 60
+  field of view: 60.000004
   orthographic: 0
   orthographic size: 5
   m_Depth: -1
@@ -207,7 +207,7 @@ Transform:
   m_GameObject: {fileID: 330585543}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 230.3025, y: 54.788002, z: 182.70749}
+  m_LocalPosition: {x: 1.54, y: 64.8, z: 20}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -631,7 +631,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b5eb0923501f12c4e80bf22d680724f7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  difficulty: 0
+  difficulty: 4
   bShouldGenerate: 0
 --- !u!1001 &1860339172
 PrefabInstance:
@@ -897,7 +897,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   difficultyStates:
   - {fileID: 11400000, guid: 2b77f3aaf3293f148b3343acc97dfbec, type: 2}
-  - {fileID: 0}
+  - {fileID: 11400000, guid: 9436972f69001a849a485f30718c8f31, type: 2}
   - {fileID: 0}
   - {fileID: 0}
   - {fileID: 0}

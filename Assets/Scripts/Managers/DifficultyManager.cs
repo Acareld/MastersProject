@@ -29,7 +29,7 @@ public class DifficultyManager : MonoBehaviour
     {
         foreach(DifficultyState state in difficultyStates)
         {
-            if(state.difficulty == difficulty)
+            if(state != null && state.difficulty == difficulty)
             {
                 return state;
             }

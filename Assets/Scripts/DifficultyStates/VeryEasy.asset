@@ -39,3 +39,4 @@ MonoBehaviour:
     minTrenchSpacing: 30
     trenchRadius: 1
     trenchDepthRange: {x: 2, y: 3}
+    maxRampSpawnSlope: 0.08

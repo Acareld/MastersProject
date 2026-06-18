@@ -131,4 +131,8 @@ MonoBehaviour:
   minHoleSpacing: 20
   trenchRadius: 0
   holeDepthRange: {x: 3, y: 6}
+  maxRampSpawnSlope: 0.08
   rampPrefab: {fileID: 919132149155446097, guid: a06a0f4c1677f514b998f4e03a70f901, type: 3}
+  groundLayer:
+    serializedVersion: 2
+    m_Bits: 8

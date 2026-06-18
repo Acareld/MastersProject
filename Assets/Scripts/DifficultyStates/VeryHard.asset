@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d1b0ca59da8ea0246ae327d0c0739e8e, type: 3}
+  m_Name: VeryHard
+  m_EditorClassIdentifier: 
+  difficulty: 4
+  slopePhases:
+  - startProgress: 0.1
+    endProgress: 0.98
+    uphillModifier: 2
+    targetSlope: 0.7
+    slopeMatchWeight: 6
+  potholeSettings:
+    potholeCount: 15
+    minPotholeSpacing: 15
+    potholeRadiusRange: {x: 1, y: 3}
+    potholeDepthRange: {x: 0.5, y: 2.5}
+  trenchSettings:
+    trenchCount: 10
+    minTrenchSpacing: 15
+    trenchRadius: 3
+    trenchDepthRange: {x: 2, y: 5}
+    maxRampSpawnSlope: 0.4

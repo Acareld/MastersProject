@@ -198,7 +198,7 @@ public class TileGeneration : MonoBehaviour
 
     }
 
-    private Vector3[] GetWorldVertices()
+    public Vector3[] GetWorldVertices()
     {
         Vector3[] worldVertices = new Vector3[vertices.Length];
         for (int i = 0; i < uvs.Length; i++)
@@ -243,7 +243,6 @@ public class TileGeneration : MonoBehaviour
 
                 vertices[i] = transform.InverseTransformPoint(changedWorldVertex);
 
-                
             }
         }
 
