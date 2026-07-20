@@ -16,9 +16,9 @@ MonoBehaviour:
   slopePhases:
   - startProgress: 0.1
     endProgress: 0.98
-    uphillModifier: 2
+    uphillModifier: 0.5
     targetSlope: 0.7
-    slopeMatchWeight: 6
+    slopeMatchWeight: 40
   potholeSettings:
     potholeCount: 15
     minPotholeSpacing: 15
@@ -27,6 +27,6 @@ MonoBehaviour:
   trenchSettings:
     trenchCount: 10
     minTrenchSpacing: 15
-    trenchRadius: 3
+    trenchRadius: 1
     trenchDepthRange: {x: 2, y: 5}
     maxRampSpawnSlope: 0.4

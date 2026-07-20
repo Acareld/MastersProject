@@ -74,8 +74,6 @@ namespace Player
 
             camerasHolder.rotation = lookRotation;
             playerLookOrientation.rotation = lookRotation;
-
-
         }
 
 
@@ -99,6 +97,18 @@ namespace Player
                     ApplyMouseMovementToPlayerRotation();
                 }
             }
+        }
+
+        public void EnableCamera()
+        {
+            camerasHolder.gameObject.SetActive(true);
+            canLook = true;
+        }
+
+        public void DisableCamera()
+        {
+            camerasHolder.gameObject.SetActive(false);
+            canLook = false;
         }
 
 

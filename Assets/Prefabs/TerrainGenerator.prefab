@@ -48,10 +48,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ee17be052de50394a8a865bd3add0700, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mapWidth: 40
-  mapDepth: 40
+  mapWidth: 4
+  mapDepth: 4
   tilePrefab: {fileID: 442675659672409208, guid: 22606ce9c4d660748904e23d744c4e41, type: 3}
   shouldRegenerate: 0
+  tilesGeneratedPerFrame: 50
+  tilesAppliedPerFrame: 50
+  quadsPerSide: 100
+  chunkSize: 100
+  triggerPointPrefab: {fileID: 8127721163591425014, guid: 3d385e7bc9f4d264181bfd64bd53b018, type: 3}
+  terrainTriggerPointPrefab: {fileID: 4544219306961626596, guid: 9a79b2d475268534c943ffb35d7d01f0, type: 3}
 --- !u!114 &2294749340803881876
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -87,6 +93,9 @@ MonoBehaviour:
     slopeMatchWeight: 5
   startPosition: {x: 0, y: 0}
   targetPosition: {x: 35, y: 35}
+  seamSampleRadius: 10
+  seamSampleDepthBehind: 6
+  seamSampleDepthAhead: 1
 --- !u!114 &159368446977646660
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -9,7 +9,6 @@ public static class MeshGenerator
         float topLeftZ = (size - 1) / 2f;
 
         MeshData meshData = new MeshData(size);
-        int vertexIndex = 0;
 
         for(int x = 0; x < size; x++)
         {
@@ -18,6 +17,64 @@ public static class MeshGenerator
               
             }
         }
+    }
+
+    public static Mesh CreateGridMesh(int quadsPerSide, float size)
+    {
+        int vertsPerSide = quadsPerSide + 1;
+
+        Vector3[] vertices = new Vector3[vertsPerSide * vertsPerSide];
+        Vector2[] uvs = new Vector2[vertices.Length];
+        int[] triangles = new int[quadsPerSide * quadsPerSide * 6];
+
+        float step = size / quadsPerSide;
+
+        int v = 0;
+
+        for(int z = 0; z < vertsPerSide; z++)
+        {
+            for(int x = 0; x < vertsPerSide; x++)
+            {
+                vertices[v] = new Vector3(x * step, 0f, z * step);
+                uvs[v] = new Vector2(x / (float)quadsPerSide, z / (float)quadsPerSide);
+                v++;
+            }
+        }
+
+        int t = 0;
+
+        for (int z = 0; z < quadsPerSide; z++)
+        {
+            for (int x = 0; x < quadsPerSide; x++)
+            {
+                int i = z * vertsPerSide + x;
+
+                triangles[t++] = i;
+                triangles[t++] = i + vertsPerSide;
+                triangles[t++] = i + 1;
+
+                triangles[t++] = i + 1;
+                triangles[t++] = i + vertsPerSide;
+                triangles[t++] = i + vertsPerSide + 1;
+            }
+        }
+
+        Mesh mesh = new Mesh();
+        mesh.name = "IGBMN";
+
+        if(vertices.Length > 65535)
+        {
+            mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
+        }
+
+        mesh.vertices = vertices;
+        mesh.uv = uvs;
+        mesh.triangles = triangles;
+
+        mesh.RecalculateBounds();
+        mesh.RecalculateNormals();
+
+        return mesh;
     }
 }
 

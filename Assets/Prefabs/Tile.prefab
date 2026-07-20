@@ -15,6 +15,7 @@ GameObject:
   - component: {fileID: 1754798988313110417}
   - component: {fileID: 3193026877026162263}
   - component: {fileID: -2142348650081425030}
+  - component: {fileID: -8074562152047985829}
   m_Layer: 3
   m_Name: Tile
   m_TagString: Untagged
@@ -68,7 +69,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 0c6143656b712ee4e94a08658031d238, type: 2}
+  - {fileID: -876546973899608171, guid: 0c467f2b415bbf148892e0cb2b587b35, type: 3}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -145,25 +146,25 @@ MonoBehaviour:
   meshRenderer: {fileID: 617877583322890801}
   meshFilter: {fileID: 1879674549594602149}
   meshCollider: {fileID: 6454608263563170049}
-  mapScaleLarge: 20
-  mapScaleSmall: 0.3
+  mapScaleLarge: 400
+  mapScaleSmall: 0.6
   terrainTypes:
   - name: Water
-    height: 0.3
+    height: 0.35
     color: {r: 0, g: 0.64864254, b: 1, a: 0}
   - name: Grass
-    height: 0.4
-    color: {r: 0, g: 0.48427665, b: 0.07720489, a: 0}
+    height: 0.45
+    color: {r: 0, g: 0.48235294, b: 0.078431375, a: 0}
   - name: Rock
-    height: 0.7
-    color: {r: 0.46540874, g: 0.46540874, b: 0.46540874, a: 0}
+    height: 0.6
+    color: {r: 0.20754719, g: 0.20754719, b: 0.20754719, a: 0}
   - name: Snow
     height: 0.85
     color: {r: 0.7058824, g: 0.8238993, b: 0.8238993, a: 0}
   - name: Lava
     height: 1
     color: {r: 1, g: 0, b: 0, a: 0}
-  heightMultiplier: 90
+  heightMultiplier: 250
   heightCurve:
     serializedVersion: 2
     m_Curve:
@@ -186,22 +187,31 @@ MonoBehaviour:
       inWeight: 0.23257895
       outWeight: 0.33333334
     - serializedVersion: 3
-      time: 0.49918953
-      value: 0.68815684
-      inSlope: 1.3150753
-      outSlope: 1.3150753
+      time: 0.42122063
+      value: 0.72981447
+      inSlope: 1.9659144
+      outSlope: 1.9659144
       tangentMode: 0
       weightedMode: 0
-      inWeight: 0.07883904
-      outWeight: 0.114928134
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 0.70300776
+      value: 1.8213729
+      inSlope: 2.1619031
+      outSlope: 2.1619031
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.03943826
+      outWeight: 0.19904183
     - serializedVersion: 3
       time: 0.99311566
       value: 2.0134325
-      inSlope: 4.2566066
-      outSlope: 4.2566066
+      inSlope: 0.18850097
+      outSlope: 0.18850097
       tangentMode: 0
       weightedMode: 0
-      inWeight: 0.15184693
+      inWeight: 0.35122144
       outWeight: 0
     m_PreInfinity: 2
     m_PostInfinity: 2
@@ -209,6 +219,9 @@ MonoBehaviour:
   shouldRegenerate: 1
   offset: {x: 0, y: 0}
   vertices: []
+  baseVertices: []
+  playerTransform: {fileID: 0}
+  vehicleTransform: {fileID: 0}
 --- !u!114 &-2142348650081425030
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -229,3 +242,18 @@ MonoBehaviour:
   difficultyPhases: []
   startPosition: {x: 0, y: 0}
   targetPosition: {x: 0, y: 0}
+  seamSampleRadius: 10
+  seamSampleDepthBehind: 6
+  seamSampleDepthAhead: 1
+--- !u!114 &-8074562152047985829
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 442675659672409208}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c0d9feedc5da7264daf76f6f53b50b3a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 

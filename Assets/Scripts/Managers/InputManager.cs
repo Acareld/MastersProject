@@ -7,8 +7,9 @@ public class InputManager : MonoBehaviour
     private InputMaster inputMaster;
     private Player.Controller playerController;
     private Vehicle.Controller vehicleController;
+    private GameManager gameManager;
 
-    private bool inVehicle = false;
+    public bool inVehicle = false;
 
     private void Awake()
     {
@@ -16,6 +17,8 @@ public class InputManager : MonoBehaviour
 
         inputMaster.Land.Jump.performed += JumpPerformed;
         inputMaster.Land.Interact.performed += InteractPerformed;
+        inputMaster.Land.Respawn.performed += RespawnPerformed;
+        inputMaster.Vehicle.Exit.performed += ExitVehiclePerformed;
     }
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -23,6 +26,7 @@ public class InputManager : MonoBehaviour
     {
         playerController = GameObject.FindWithTag("Player").GetComponent<Player.Controller>();
         vehicleController = GameObject.FindWithTag("Vehicle").GetComponent<Vehicle.Controller>();
+        gameManager = FindFirstObjectByType<GameManager>();
     }
 
     public Vector2 GetMovementInput()
@@ -31,8 +35,6 @@ public class InputManager : MonoBehaviour
         {
             // tracks independently
             Vector2 vehicleInput = new Vector2();
-            /*vehicleInput.x = inputMaster.Vehicle.LeftTrack.ReadValue<float>();
-            vehicleInput.y = inputMaster.Vehicle.RightTrack.ReadValue<float>();*/
 
             float move = inputMaster.Vehicle.Move.ReadValue<float>();
             float turn = inputMaster.Vehicle.Turn.ReadValue<float>();
@@ -50,20 +52,56 @@ public class InputManager : MonoBehaviour
 
     private void InteractPerformed(InputAction.CallbackContext context)
     {
+        
+
         if(inVehicle)
         {
-            inVehicle = false;
-            playerController.gameObject.SetActive(true);
-            vehicleController.look.DisableCamera();
-            vehicleController.movement.isActive = false; 
+            /* inVehicle = false;
+             vehicleController.look.DisableCamera();
+             playerController.ExitVehicle(vehicleController.GetDriverSpawnPointTransform());
+             vehicleController.movement.isActive = false; 
+             playerController.movement.isActive = true;*/
+            vehicleController.interact.OnInteract();
         }
         else
         {
-            inVehicle = true;
+            playerController.interact.OnInteract();
+            /*inVehicle = true;
             vehicleController.look.EnableCamera();
-            playerController.gameObject.SetActive(false);
-            vehicleController.movement.isActive = true;
+            playerController.EnterVehicle();
+            vehicleController.movement.isActive = true;*/
         }      
+    }
+
+    private void ExitVehiclePerformed(InputAction.CallbackContext context)
+    {
+        if(inVehicle)
+        {
+            if(vehicleController.CanExit())
+            {
+                vehicleController.interact.Disable();
+                inVehicle = false;
+                vehicleController.look.DisableCamera();
+                playerController.ExitVehicle(vehicleController.GetDriverSpawnPointTransform());
+                vehicleController.movement.isActive = false;
+                playerController.movement.isActive = true;
+            }
+            else
+            {
+                Debug.LogWarning("Door not open, cannot exit");
+            }
+            
+        }
+        else
+        {
+            Debug.LogWarning("Not in Vehicle, cannot exit");
+        }
+    }
+
+    private void RespawnPerformed(InputAction.CallbackContext context)
+    {
+        if (inVehicle) inVehicle = !inVehicle;
+        gameManager.Respawn();
     }
 
 

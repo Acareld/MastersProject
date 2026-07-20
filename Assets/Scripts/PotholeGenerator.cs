@@ -24,13 +24,23 @@ public class PotholeGenerator : MonoBehaviour
         if (path == null || path.Count < 5) return;
 
         List<Vector2Int> placedPotholes = new List<Vector2Int>();
-        List<Vector2Int> candidates = new List<Vector2Int>(roadMask);
-
         int placed = 0;
 
+        float skipDistance = 10f;
+
+        List<Vector2Int> candidates = new List<Vector2Int>();
+
+        foreach (Vector2Int node in roadMask)
+        {
+            Vector3 pos = nodeDict[node].position;
+
+            if (Vector3.Distance(pos, path[0].position) >= skipDistance)
+            {
+                candidates.Add(node);
+            }
+        }
 
         PathFinder.Shuffle(candidates);
-
         foreach (Vector2Int candidate in candidates)
         {
             if (placed >= potholeCount) break;

@@ -1,3 +1,6 @@
+using System.Linq;
+using Unity.Collections;
+using Unity.Jobs;
 using Unity.Mathematics;
 using UnityEngine;
 
@@ -11,8 +14,43 @@ public class NoiseMapGenerator : MonoBehaviour
     public float lacunarity = 2f;
     public int seed;
     
+    public float[] ScheduleNoiseJob(float scaleLarge, Vector2 offset, Vector2[] uvs)
+    {
+        NativeArray<float2> nativeUvs = new NativeArray<float2>(uvs.Length, Allocator.TempJob);
+        NativeArray<float> nativeNoiseMap = new NativeArray<float>(uvs.Length, Allocator.TempJob);
 
-    public float[] GenerateNoiseMap(float scaleLarge, float scaleSmall, Vector2 offset, Vector2[] uvs, AnimationCurve primaryCurve)
+        for (int i = 0; i < uvs.Length; i++)
+        {
+            nativeUvs[i] = new float2(uvs[i].x, uvs[i].y);
+        }
+
+        NoiseMapJob job = new NoiseMapJob
+        {
+            uvs = nativeUvs,
+            noiseMap = nativeNoiseMap,
+
+            scale = scaleLarge,
+            offset = new float2(offset.x, offset.y),
+
+            octaves = octaves,
+            persistence = persistence,
+            lacunarity = lacunarity
+        };
+
+        JobHandle handle = job.ScheduleParallelByRef(uvs.Length, 64, default);
+
+        handle.Complete();
+
+        float[] result = nativeNoiseMap.ToArray();
+
+        nativeUvs.Dispose();
+        nativeNoiseMap.Dispose();
+
+        return result;
+    }
+
+
+    public float[] GenerateNoiseMap(float scaleLarge, float scaleSmall, Vector2 offset, Vector2[] uvs)
     {
         float[] noiseMap = new float[uvs.Length];
 
@@ -25,26 +63,15 @@ public class NoiseMapGenerator : MonoBehaviour
             octaveOffsets[i] = new Vector2(offsetX, offsetY);
         }
 
-
         float maxNoiseHeight = float.MinValue;
         float minNoiseHeight = float.MaxValue;
 
         for (int i = 0; i < uvs.Length; i++)
         {
-            //noiseMap[i] = Unity.Mathematics.noise.cellular2x2(float2((uvs[i].x + offset.x) * scale, (uvs[i].y + offset.y) * scale)).x;
-            //float primary = Mathf.PerlinNoise((uvs[i].x + offset.x) / scaleLarge, (uvs[i].y + offset.y) / scaleLarge);
-  
-            //noiseMap[i] = Unity.Mathematics.math.saturate(noiseMap[i]);
-
-            //float detail = Mathf.PerlinNoise((uvs[i].x + offset.x) / scaleSmall, (uvs[i].y + offset.y) / scaleSmall);
-            //detail -= 0.5f;
-
-            //float height = primary + detail * 0.02f;
-
             float x = uvs[i].x + offset.x;
             float y = uvs[i].y + offset.y;
 
-            float height = PerlinOctaves(x,y,scaleLarge, octaves, persistence, lacunarity, octaveOffsets);
+            float height = PerlinOctaves(x,y,scaleLarge, octaves, persistence, lacunarity);
 
             if(height > maxNoiseHeight)
             {
@@ -54,7 +81,6 @@ public class NoiseMapGenerator : MonoBehaviour
             {
                 minNoiseHeight = height;
             }
-
             noiseMap[i] = height;
         }
 
@@ -66,7 +92,7 @@ public class NoiseMapGenerator : MonoBehaviour
         return noiseMap;
     }
 
-    private float PerlinOctaves(float x, float y, float baseScale, int octaves, float persistence, float lacunarity, Vector2[] octaveOffsets)
+    private float PerlinOctaves(float x, float y, float baseScale, int octaves, float persistence, float lacunarity)
     {
         float total = 0f;
         float amplitude = 1f;

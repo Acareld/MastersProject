@@ -1,0 +1,42 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d1b0ca59da8ea0246ae327d0c0739e8e, type: 3}
+  m_Name: Easy
+  m_EditorClassIdentifier: 
+  difficulty: 1
+  slopePhases:
+  - startProgress: 0.1
+    endProgress: 0.35
+    uphillModifier: 6
+    targetSlope: 0.12
+    slopeMatchWeight: 3
+  - startProgress: 0.45
+    endProgress: 0.75
+    uphillModifier: 3
+    targetSlope: 0.2
+    slopeMatchWeight: 6
+  - startProgress: 0.82
+    endProgress: 0.97
+    uphillModifier: 6
+    targetSlope: 0.08
+    slopeMatchWeight: 3
+  potholeSettings:
+    potholeCount: 7
+    minPotholeSpacing: 27
+    potholeRadiusRange: {x: 0.6, y: 1.8}
+    potholeDepthRange: {x: 0.5, y: 1.3}
+  trenchSettings:
+    trenchCount: 4
+    minTrenchSpacing: 27
+    trenchRadius: 1
+    trenchDepthRange: {x: 2, y: 3.5}
+    maxRampSpawnSlope: 0.14

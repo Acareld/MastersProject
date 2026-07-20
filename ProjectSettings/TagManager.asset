@@ -11,6 +11,13 @@ TagManager:
   - VehicleCamerasHolder
   - DifficultyManager
   - TerrainGeneratorManager
+  - GameManager
+  - VehicleRigidbody
+  - PlayerChar
+  - DriverSpawnPointRight
+  - DriverSpawnPointLeft
+  - DataCollector
+  - LoadingScreenManager
   layers:
   - Default
   - TransparentFX

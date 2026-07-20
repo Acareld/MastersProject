@@ -18,17 +18,17 @@ MonoBehaviour:
     endProgress: 0.3
     uphillModifier: 8
     targetSlope: 0.08
-    slopeMatchWeight: 1
+    slopeMatchWeight: 2
   - startProgress: 0.5
     endProgress: 0.7
     uphillModifier: 4
     targetSlope: 0.14
-    slopeMatchWeight: 3
+    slopeMatchWeight: 4
   - startProgress: 0.8
     endProgress: 0.95
     uphillModifier: 8
     targetSlope: 0.04
-    slopeMatchWeight: 1
+    slopeMatchWeight: 2
   potholeSettings:
     potholeCount: 5
     minPotholeSpacing: 30
